@@ -24,20 +24,36 @@ validate_url()
 }
 
 # Get response time and status from the URL
-check_response()
+get_response()
 {
 	response_time=$(curl -o /tmp/response -i -s -L -w %{time_total} $1)
         status_code=`grep "HTTP/" /tmp/response | cut -d" " -f2`
         status_phrase=`grep -i "component status" /tmp/response | cut -d":" -f2`
-        #echo $response_time $status_code $status_phrase
         rm -rf /tmp/response
-	if [ "$status_code" -eq 200 ]
+	check_response $response_time $status_code $status_phrase $1
+}
+	
+# Check site status and response time
+check_response()
+{
+	response_time=`echo $1 | sed 's/\.//g'`
+	echo $response_time
+	status_code=$2
+	status_phrase=`echo $3 | tr '[A-Z]' '[a-z]'`
+	if [ "$status_code" -eq 200 ] && [ "$status_phrase" = "green" ]
 	then
-		status_check="  Green  "
-		result $status_check $1 $response_time
+		status_check="Green"
+		result $status_check $4 $response_time
 	else
-		status_check="Red    "
-		result $status_check $1 $response_time
+		status_check="Red"
+		result $status_check $4 $response_time
+	fi
+
+	if [ "$response_time" -gt 300 ]
+	then
+		echo "Slow response"
+	else
+		echo "Fast response"
 	fi
 }
 
@@ -61,11 +77,12 @@ table_footer()
 	echo "---------------------------------------------------------------------------------------------------------------------------------------------"
 }
 
-table_header
-for url in $url_list
-do
-	validate_url $url
-done
-table_footer
+check_response 3.00 200 GreeN 
+#table_header
+#for url in $url_list
+#do
+#	validate_url $url
+#done
+#table_footer
 
 
