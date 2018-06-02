@@ -83,12 +83,67 @@ table_footer()
         echo "---------------------------------------------------------------------------------------------------------------------------------------------"
 }
 
+test_validate_url()
+{
+	valid_url="www.google.com"
+	invalid_url="abcd.xyz"
+	response=$(validate_url $valid_url)
+	if [ "$response" = "valid" ]; then echo "Valid URL test successful"
+	else echo "Valid URL test Failed"; exit
+	fi
+	response=$(validate_url $invalid_url)
+	if [ "$response" = "invalid" ]; then echo "Invalid URL test successful"
+	else echo "Invalid URL test Failed"; exit
+        fi
+}
+
+test_get_response()
+{
+	url="www.google.com"
+	response=$(get_response $url)
+	response_time=`echo $response | cut -d" " -f2 | sed 's/\.//g'`; status_phrase=`echo $response | cut -d" " -f4 | tr '[A-Z]' '[a-z]'`; status_code=`echo $response | cut -d" " -f6`
+	if [ "$status_phrase" = "green" ] || [ "$status_phrase" = "red" ]; then echo "get_response Test Successful";
+	else echo "get_response Test Failed"; exit ; fi
+	echo "${response_time}" | grep -q -v '[0-9]'
+	if [ $? = 1 ]; then echo "get_response Test Successful"; 
+	else echo "get_response Test Failed"; exit; fi
+	echo "${status_code}" | grep -q -v '[0-9]'
+        if [ $? = 1 ]; then echo "get_response Test Successful";
+        else echo "get_response Test Failed"; exit; fi
+}
+
+test_check_response()
+{
+	response_time=0.203; status_code=200; status_phrase=""
+	response=$(check_response $response_time $status_code $status_phrase)
+	response_rate=`echo $response | cut -d" " -f4`; url_status=`echo $response | cut -d" " -f6`
+	if [ "$response_rate" = "Fast" ] && [ "$url_status" = "Unknown" ]; then echo "check_response Test Successful"; else echo "check_response Test Failed"; exit; fi
+	response_time=0.306; status_code=200; status_phrase="GrEeN"
+        response=$(check_response $response_time $status_code $status_phrase)
+	response_rate=`echo $response | cut -d" " -f4`; url_status=`echo $response | cut -d" " -f6`
+        if [ "$response_rate" = "Slow" ] && [ "$url_status" = "Green" ]; then echo "check_response Test Successful"; else echo "check_response Test Failed"; exit; fi
+	response_time=1.234; status_code=401; status_phrase="Red"
+        response=$(check_response $response_time $status_code $status_phrase)
+	response_rate=`echo $response | cut -d" " -f4`; url_status=`echo $response | cut -d" " -f6`
+        if [ "$response_rate" = "Slow" ] && [ "$url_status" = "Auth_error" ]; then echo "check_response Test Successful"; else echo "check_response Test Failed"; exit; fi
+   	response_time=1.234; status_code=401; status_phrase="green"
+        response=$(check_response $response_time $status_code $status_phrase)
+   	response_rate=`echo $response | cut -d" " -f4`; url_status=`echo $response | cut -d" " -f6`
+        if [ "$response_rate" = "Slow" ] && [ "$url_status" = "Auth_error" ]; then echo "check_response Test Successful"; else echo "check_response Test Failed"; exit; fi
+}
+
+echo "Running Test Suit...\n"
+test_validate_url
+test_get_response
+test_check_response
+
 # Get the list of arguments given to the script
 url_list=`echo $@`
 if [ -z "$url_list" ]
 then echo "Please provide URL as argument to the script"; exit
 fi
 
+echo "\nGenerating Report...\n"
 table_header
 table_rows
 table_footer
