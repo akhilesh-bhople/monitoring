@@ -1,4 +1,4 @@
 language: bash
 
 script:
-	- sh monitor.sh www.google.com 
+  - sh monitor.sh www.google.com 
