@@ -1,0 +1,7 @@
+language: bash
+
+before_script:
+	- chmod +x monitor.sh
+
+script:
+	- ./monitor.sh www.google.com byuasvbdibvisa https://www.wikipedia.org/ http://www.iitk.ac.in/LDP/LDP/LG/issue52/okopnik2.html https://www.tldp.org/LDP/abs/html/complexfunct.html

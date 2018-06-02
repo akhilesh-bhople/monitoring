@@ -132,7 +132,7 @@ test_check_response()
         if [ "$response_rate" = "Slow" ] && [ "$url_status" = "Auth_error" ]; then echo "check_response Test Successful"; else echo "check_response Test Failed"; exit; fi
 }
 
-echo "Running Test Suit...\n"
+echo "\nRunning Test Suit...\n"
 test_validate_url
 test_get_response
 test_check_response
