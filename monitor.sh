@@ -65,7 +65,7 @@ result()
 	response_time=$3
 	response_type=$4
 	timestamp=`date +%s`
-	printf '%-15s %-15s %-25s %-25s %-40s\n' $timestamp $status_check $response_time $response_type $url
+	printf '%-15s %-15s %-25s %-25s %-s\n' $timestamp $status_check $response_time $response_type $url
 	echo $timestamp,$status_check,$url,$response_time >>/var/log/monitoring.log
 }
 
