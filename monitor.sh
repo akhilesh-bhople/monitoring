@@ -31,18 +31,25 @@ get_response()
 	response_time=$(curl -o /tmp/response -i -s -L -w %{time_total} $url)
         status_code=`grep "HTTP/" /tmp/response | cut -d" " -f2`
         status_phrase=`grep -i "component status" /tmp/response | cut -d":" -f2`
-        rm -rf /tmp/response
-	check_response $response_time $status_code $status_phrase $url
+	rm -rf /tmp/response
+	check_response $response_time $status_code $url $status_phrase
 }
 	
 # Check site status and response time
 check_response()
 {
 	response_time=`echo $1 | sed 's/\.//g'`
-	echo $response_time
 	status_code=$2
-	status_phrase=`echo $3 | tr '[A-Z]' '[a-z]'`
-	url=$4
+	status_phrase=`echo $4 | tr '[A-Z]' '[a-z]'`
+	url=$3
+
+	if [ "$response_time" -gt 300 ]
+        then
+                echo "Slow response"
+        else
+                echo "Fast response"
+        fi
+
 	if [ "$status_code" -eq 200 ] && [ "$status_phrase" = "green" ]
 	then
 		status_check="Green"
@@ -51,13 +58,6 @@ check_response()
 		status_check="Red"
 		result $status_check $url $response_time
 	fi
-
-#	if [ "$response_time" -gt 300 ]
-#	then
-#		echo "Slow response"
-#	else
-#		echo "Fast response"
-#	fi
 }
 
 # Process results
