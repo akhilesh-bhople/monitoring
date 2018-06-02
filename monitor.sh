@@ -3,6 +3,10 @@
 ## Check URL status
 ## Akhilesh Bhople akhilesh.bhople@gmail.com
 
+## Usage :
+## sh monitor.sh <url> . . . . <url>
+##
+## Note : Multiple urls can be provided separated by space to the script
 
 validate_url()
 {
