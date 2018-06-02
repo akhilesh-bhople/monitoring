@@ -67,16 +67,11 @@ table_rows()
 	do
         	validity=$(validate_url $url)
 	        if [ "$validity" = "valid" ]; then
-        	       	get_response_result=$(get_response $url)
-	                response_time=`echo $get_response_result | cut -d" " -f2`
-       	        	status_phrase=`echo $get_response_result | cut -d" " -f4`
-                	status_code=`echo $get_response_result | cut -d" " -f6`
-        	        check_response_result=$(check_response $response_time $status_code $status_phrase)
-                	timestamp=`echo $check_response_result | cut -d" " -f2`
-	                response_rate=`echo $check_response_result | cut -d" " -f4`
-        	        url_status=`echo $check_response_result | cut -d" " -f6`
-                	response_time_ms=`echo $check_response_result | cut -d" " -f8`
-        	        show_result $url_status $url $response_time_ms $response_rate $timestamp
+	       	       	get_response_result=$(get_response $url)
+        	        response_time=`echo $get_response_result | cut -d" " -f2`; status_phrase=`echo $get_response_result | cut -d" " -f4`; status_code=`echo $get_response_result | cut -d" " -f6`
+       	        	check_response_result=$(check_response $response_time $status_code $status_phrase)
+               		timestamp=`echo $check_response_result | cut -d" " -f2`; response_rate=`echo $check_response_result | cut -d" " -f4`; url_status=`echo $check_response_result | cut -d" " -f6`;	response_time_ms=`echo $check_response_result | cut -d" " -f8`
+       	        	show_result $url_status $url $response_time_ms $response_rate $timestamp
         	else
                 	timestamp=`date +%s`
 	                show_result "Invalid" $url "-----" "-----" $timestamp
