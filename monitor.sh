@@ -9,10 +9,8 @@ validate_url()
 	url=$1
 	validity=`curl -L -I -s --retry 3 --connect-timeout 5 $url`
 	if [ -n "$validity" ]
-        then
-		echo "valid"
-	else
-		echo "invalid"
+	then echo "valid"
+	else echo "invalid"
 	fi
 }
 
@@ -24,8 +22,7 @@ get_response()
         status_code=`grep "HTTP/" /tmp/response | cut -d" " -f2`
         status_phrase=`grep -i "component status" /tmp/response | cut -d":" -f2`
 	if [ -z "$status_phrase" ]
-	then
-		status_phrase="Red"
+	then status_phrase="Red"
 	fi
 	echo "response_time: $response_time status_phrase: $status_phrase status_code: $status_code"
         rm -rf /tmp/response
@@ -37,22 +34,15 @@ check_response()
         status_code=$2
         status_phrase=`echo $3 | tr '[A-Z]' '[a-z]'`
 	timestamp=`date +%s`
-
 	if [ "$response_time_ms" -gt 300 ]
-        then
-                response_rate="Slow_response"
-        else
-                response_rate="Fast_response"
+        then response_rate="Slow"
+        else response_rate="Fast"
         fi
-	
 	if [ "$status_code" = 401 ]
-	then
-		url_status="Auth_error"	
+	then url_status="Auth_error"	
 	elif [ "$status_code" = 200 ] && [ "$status_phrase" = "green" ] 
-	then
-		url_status="Green"
-	else
-		url_status="Unknown"
+	then url_status="Green"
+	else url_status="Unknown"
 	fi
 	echo "timestamp: $timestamp response_rate: $response_rate url_status: $url_status response_time_ms: $response_time_ms"
 }
@@ -75,6 +65,34 @@ table_header()
         echo "---------------------------------------------------------------------------------------------------------------------------------------------"
 }
 
+table_rows()
+{
+	for url in $url_list
+	do
+        	validity=$(validate_url $url)
+	        if [ "$validity" = "valid" ]
+        	then
+                	get_response_result=$(get_response $url)
+	                response_time=`echo $get_response_result | cut -d" " -f2`
+        	        status_phrase=`echo $get_response_result | cut -d" " -f4`
+                	status_code=`echo $get_response_result | cut -d" " -f6`
+	                #echo $response_time $status_phrase $status_code
+	
+        	        check_response_result=$(check_response $response_time $status_code $status_phrase)
+                	timestamp=`echo $check_response_result | cut -d" " -f2`
+	                response_rate=`echo $check_response_result | cut -d" " -f4`
+        	        url_status=`echo $check_response_result | cut -d" " -f6`
+                	response_time_ms=`echo $check_response_result | cut -d" " -f8`
+	                #echo $timestamp $response_rate $url_status $response_time_ms
+	
+        	        show_result $url_status $url $response_time_ms $response_rate $timestamp
+        	else
+                	timestamp=`date +%s`
+	                show_result "Invalid" $url "-----" "-----" $timestamp
+        	fi
+	done
+
+}
 table_footer()
 {
         echo "---------------------------------------------------------------------------------------------------------------------------------------------"
@@ -83,35 +101,10 @@ table_footer()
 # Get the list of arguments given to the script
 url_list=`echo $@`
 if [ -z "$url_list" ]
-then
-        echo "Please provide URL as argument to the script"
-        exit
+then echo "Please provide URL as argument to the script"; exit
 fi
 
 table_header
-for url in $url_list
-do
-        validity=$(validate_url $url)
-	if [ "$validity" = "valid" ]
-	then
-		get_response_result=$(get_response $url)
-		response_time=`echo $get_response_result | cut -d" " -f2`
-		status_phrase=`echo $get_response_result | cut -d" " -f4`
-		status_code=`echo $get_response_result | cut -d" " -f6`
-		#echo $response_time $status_phrase $status_code
-		
-		check_response_result=$(check_response $response_time $status_code $status_phrase)
-		timestamp=`echo $check_response_result | cut -d" " -f2`
-		response_rate=`echo $check_response_result | cut -d" " -f4`
-		url_status=`echo $check_response_result | cut -d" " -f6`
-		response_time_ms=`echo $check_response_result | cut -d" " -f8`
-		#echo $timestamp $response_rate $url_status $response_time_ms
-		
-		show_result $url_status $url $response_time_ms $response_rate $timestamp
-	else
-		timestamp=`date +%s`
-		show_result "Invalid" $url "-----" "-----" $timestamp
-	fi
-done
+table_rows
 table_footer
 
