@@ -7,9 +7,6 @@
 ##
 ##
 
-# Get the list of arguments given to the script
-url_list=`echo $@`
-
 # Check and process if URL is valid
 validate_url()
 {
@@ -20,7 +17,7 @@ validate_url()
 		get_response $url
 	else
 		status_check="Invalid"
-		result $status_check $url NA
+		result $status_check $url "-----" "-----"
 	fi
 }
 
@@ -45,18 +42,18 @@ check_response()
 
 	if [ "$response_time" -gt 300 ]
         then
-                echo "Slow response"
+                response_type="Slow response"
         else
-                echo "Fast response"
+                response_type="Fast response"
         fi
 
 	if [ "$status_code" -eq 200 ] && [ "$status_phrase" = "green" ]
 	then
 		status_check="Green"
-		result $status_check $url $response_time
+		result $status_check $url $response_time $response_type
 	else
 		status_check="Red"
-		result $status_check $url $response_time
+		result $status_check $url $response_time $response_type
 	fi
 }
 
@@ -66,15 +63,17 @@ result()
 	status_check=$1
 	url=$2
 	response_time=$3
+	response_type=$4
 	timestamp=`date +%s`
-	printf '%10s %10s %15s %45s\n' $timestamp $status_check $response_time $url
+	printf '%-15s %-15s %-25s %-25s %-40s\n' $timestamp $status_check $response_time $response_type $url
 	echo $timestamp,$status_check,$url,$response_time >>/var/log/monitoring.log
 }
 
+# Create Table body
 table_header()
 {
 	echo "---------------------------------------------------------------------------------------------------------------------------------------------"
-        echo "Timestamp \tStatus \t\tResponse_Time \t\t\t\tURL"
+	printf '%-15s %-15s %-25s %-25s %-40s\n' "Timestamp" "Status" "Response_Time" "Response_Rate" "URL"
         echo "---------------------------------------------------------------------------------------------------------------------------------------------"
 }
 
@@ -83,12 +82,12 @@ table_footer()
 	echo "---------------------------------------------------------------------------------------------------------------------------------------------"
 }
 
-#check_response 3.00 200 GreeN 
+# Get the list of arguments given to the script
+url_list=`echo $@`
+
 table_header
 for url in $url_list
 do
 	validate_url $url
 done
 table_footer
-
-
