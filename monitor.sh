@@ -152,9 +152,10 @@ run_test_suit()
 # Generate the Monitoring Report when -u option is selected
 generate_report()
 {
+	url_list=$@
 	echo "\nGenerating Report...\n"
 	table_header
-	table_rows
+	table_rows $url_list
 	table_footer
 }
 
@@ -165,35 +166,16 @@ help_data()
 	exit
 }
 
-# Read the options
-TEMP=`getopt -o :tu:h --long test,url:,help -n 'monitor.sh' -- "$@"`
-eval set -- "$TEMP"
+# call help_data function when no arguments are passed
+if [ $# -eq 0 ]; then help_data; fi
 
-# Initial flag values
-hlp=0; tst=0
-
-if [ "$#" -eq 1 ]; then help_data; fi
-
-while true ; do
-    case "$1" in
-        -u|--url)
-            case "$2" in
-                "") shift 2 ;;
-                *) url_list=$2 ; shift 2 ;;
-            esac ;;
-        -h|--help) hlp=1; shift;;
-        -t|--test) tst=1; shift;;
-        --) shift ; break ;;
-         *) echo "Internal error!" ; exit 1 ;;
-    esac
+# Read the options and call functions
+while getopts ':htu:' opt; do
+	case "$opt" in
+		h) help_data ;;
+		t) run_test_suit ;;
+		u) if [ -n "$OPTARG" ]; then generate_report $OPTARG; fi ;;
+		*) echo "Enter Valid Arguments for the script"  ;;
+	esac
 done
-
-# Call help_data function if -h option is enabled
-if [ $hlp -eq 1 ]; then help_data; fi
-
-# Call run_test_suit function if -t option is selected
-if [ $tst -eq 1  ]; then run_test_suit; fi
-
-# Call generate_report function if -u option is selected with non-empty arguments
-if [ -n "$url_list" ]; then generate_report; fi
-
+shift "$(($OPTIND -1))"
