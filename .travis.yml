@@ -5,5 +5,5 @@ language: bash
 script:
   - sudo sh monitor.sh -h
   - sudo sh monitor.sh -t
-  - sudo sh monitor.sh -u \"www.google.com abcd.xyz  https://www.wikipedia.org/ https://medium.com/@pimterry/testing-your-shell-scripts-with-bats-abfca9bdc5b9 https://unix.stackexchange.com/questions/396223/bash-shell-script-output-alignment\"
+  - sudo sh monitor.sh -u "www.google.com abcd.xyz  https://www.wikipedia.org/ https://medium.com/@pimterry/testing-your-shell-scripts-with-bats-abfca9bdc5b9 https://unix.stackexchange.com/questions/396223/bash-shell-script-output-alignment"
   - cat /var/log/monitoring.log
