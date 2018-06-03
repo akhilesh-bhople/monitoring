@@ -1,11 +1,9 @@
 dist: xenial
 
-sudo: enabled
+sudo: required
 
 language: bash
 
 script:
-  - sh monitor.sh www.google.com 
+  - sh monitor.sh www.google.com abcd.xyz  https://www.wikipedia.org/ https://medium.com/@pimterry/testing-your-shell-scripts-with-bats-abfca9bdc5b9 https://unix.stackexchange.com/questions/396223/bash-shell-script-output-alignment
 
-after-script:
-  - cat /var/log/monitoring.log
