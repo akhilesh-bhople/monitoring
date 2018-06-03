@@ -1,6 +1,6 @@
 dist: xenial
 
-sudo: required
+sudo: enabled
 
 language: bash
 
