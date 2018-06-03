@@ -3,11 +3,29 @@
 ## Check URL status
 ## Akhilesh Bhople akhilesh.bhople@gmail.com
 
-## Usage :
-## sh monitor.sh <url> . . . . <url>
-##
-## Note : Multiple urls can be provided separated by space to the script
+# Read the options
+TEMP=`getopt -o tu:h --long test,url:,help -n 'monitor.sh' -- "$@"`
+eval set -- "$TEMP"
 
+# Initial flag values
+hlp=0
+tst=0
+
+while true ; do
+    case "$1" in
+        -u|--url)
+            case "$2" in
+                "") shift 2 ;;
+                *) url_list=$2 ; shift 2 ;;
+            esac ;;
+	-h|--help) hlp=1; shift;;
+	-t|--test) tst=1; shift;;
+	--) shift ; break ;;
+         *) echo "Internal error!" ; exit 1 ;;
+    esac
+done
+
+# Check if the URL exists
 validate_url()
 {
 	url=$1
@@ -32,6 +50,7 @@ get_response()
         rm -rf /tmp/response
 }
 
+# Check the response data and process the results
 check_response()
 {
         response_time_ms=`echo $1 | sed 's/\.//g'`
@@ -47,6 +66,7 @@ check_response()
 	echo "timestamp: $timestamp response_rate: $response_rate url_status: $url_status response_time_ms: $response_time_ms"
 }
 
+# Showcase the result in the required format
 show_result()
 {
         status_check=$1
@@ -58,6 +78,7 @@ show_result()
         echo $timestamp,$status_check,$url,$response_time >>/var/log/monitoring.log
 }
 
+# Print output table header with column names
 table_header()
 {
         echo "---------------------------------------------------------------------------------------------------------------------------------------------"
@@ -65,6 +86,7 @@ table_header()
         echo "---------------------------------------------------------------------------------------------------------------------------------------------"
 }
 
+# Create data for output table row, and pass to show_result function
 table_rows()
 {
 	for url in $url_list
@@ -82,11 +104,14 @@ table_rows()
         	fi
 	done
 }
+
+# Print output table footer
 table_footer()
 {
         echo "---------------------------------------------------------------------------------------------------------------------------------------------"
 }
 
+# Automated test for validate_url function
 test_validate_url()
 {
 	valid_url="www.google.com"
@@ -101,6 +126,7 @@ test_validate_url()
         fi
 }
 
+# Automated test for get_response function
 test_get_response()
 {
 	url="www.google.com"
@@ -115,7 +141,7 @@ test_get_response()
         if [ $? = 1 ]; then echo "get_response Test Successful";
         else echo "get_response Test Failed"; exit; fi
 }
-
+# Automated test for check_response function
 test_check_response()
 {
 	response_time=0.203; status_code=200; status_phrase=""
@@ -136,19 +162,40 @@ test_check_response()
         if [ "$response_rate" = "Slow" ] && [ "$url_status" = "Auth_error" ]; then echo "check_response Test Successful"; else echo "check_response Test Failed"; exit; fi
 }
 
-echo "\nRunning Test Suit...\n"
-test_validate_url
-test_get_response
-test_check_response
+# Run the automated test cases againts the functions when -t option is selected
+run_test_suit()
+{
+	echo "\nRunning Test Suit...\n"
+	test_validate_url
+	test_get_response
+	test_check_response
+}
 
-# Get the list of arguments given to the script
-url_list=`echo $@`
-if [ -z "$url_list" ]
-then echo "Please provide URL as argument to the script"; exit
-fi
+# Generate the Monitoring Report when -u option is selected
+generate_report()
+{
+	echo "\nGenerating Report...\n"
+	table_header
+	table_rows
+	table_footer
+}
 
-echo "\nGenerating Report...\n"
-table_header
-table_rows
-table_footer
+# Display Usage information to user when -h option is selected
+help_data()
+{
+	echo "Usage :\n\t-h|--help\t\tShow this message\n\t\t\t\tExample: sh monitor.sh -h\n\n\t-t|--test\t\tRun automated test suit for the script\n\t\t\t\tExample: sh monitor.sh -t\n\n\t-u|--url\t\tProvide URLs to be tested as arguments\n\t\t\t\tExample: sh monitor.sh -u \"www.google.com www.wikipedia.org\"\n"
+	exit
+}
+
+# Call help_data if no options/arguments are provided to the script
+if [ -z "$@" ]; then help_data; fi
+
+# Call help_data function if -h option is enabled
+if [ $hlp -eq 1 ]; then help_data; fi
+
+# Call run_test_suit function if -t option is selected
+if [ $tst -eq 1  ]; then run_test_suit; fi
+
+# Call generate_report function if -u option is selected with non-empty arguments
+if [ -n "$url_list" ]; then generate_report; fi
 
