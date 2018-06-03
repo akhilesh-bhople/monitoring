@@ -3,28 +3,6 @@
 ## Check URL status
 ## Akhilesh Bhople akhilesh.bhople@gmail.com
 
-# Read the options
-TEMP=`getopt -o tu:h --long test,url:,help -n 'monitor.sh' -- "$@"`
-eval set -- "$TEMP"
-
-# Initial flag values
-hlp=0
-tst=0
-
-while true ; do
-    case "$1" in
-        -u|--url)
-            case "$2" in
-                "") shift 2 ;;
-                *) url_list=$2 ; shift 2 ;;
-            esac ;;
-	-h|--help) hlp=1; shift;;
-	-t|--test) tst=1; shift;;
-	--) shift ; break ;;
-         *) echo "Internal error!" ; exit 1 ;;
-    esac
-done
-
 # Check if the URL exists
 validate_url()
 {
@@ -187,8 +165,28 @@ help_data()
 	exit
 }
 
-# Call help_data if no options/arguments are provided to the script
-if [ -z "$@" ]; then help_data; fi
+# Read the options
+TEMP=`getopt -o :tu:h --long test,url:,help -n 'monitor.sh' -- "$@"`
+eval set -- "$TEMP"
+
+# Initial flag values
+hlp=0; tst=0
+
+if [ "$#" -eq 1 ]; then help_data; fi
+
+while true ; do
+    case "$1" in
+        -u|--url)
+            case "$2" in
+                "") shift 2 ;;
+                *) url_list=$2 ; shift 2 ;;
+            esac ;;
+        -h|--help) hlp=1; shift;;
+        -t|--test) tst=1; shift;;
+        --) shift ; break ;;
+         *) echo "Internal error!" ; exit 1 ;;
+    esac
+done
 
 # Call help_data function if -h option is enabled
 if [ $hlp -eq 1 ]; then help_data; fi
