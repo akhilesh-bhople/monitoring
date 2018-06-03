@@ -162,7 +162,7 @@ generate_report()
 # Display Usage information to user when -h option is selected
 help_data()
 {
-	echo "Usage :\n\t-h|--help\t\tShow this message\n\t\t\t\tExample: sh monitor.sh -h\n\n\t-t|--test\t\tRun automated test suit for the script\n\t\t\t\tExample: sh monitor.sh -t\n\n\t-u|--url\t\tProvide URLs to be tested as arguments\n\t\t\t\tExample: sh monitor.sh -u \"www.google.com www.wikipedia.org\"\n"
+	echo "Usage :\n\t-h\tShow this message\n\t\tExample: sh monitor.sh -h\n\n\t-t\tRun automated test suit for the script\n\t\tExample: sh monitor.sh -t\n\n\t-u\tProvide URLs to be tested as arguments\n\t\tExample: sh monitor.sh -u \"www.google.com www.wikipedia.org\"\n"
 	exit
 }
 
