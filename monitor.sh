@@ -170,7 +170,7 @@ help_data()
 if [ $# -eq 0 ]; then help_data; fi
 
 # Read the options and call functions
-while getopts ':htu:' opt; do
+while getopts 'htu:' opt; do
 	case "$opt" in
 		h) help_data ;;
 		t) run_test_suit ;;
